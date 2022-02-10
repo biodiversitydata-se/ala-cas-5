@@ -11,6 +11,9 @@ fun Authentication.booleanAttribute(name: String): Boolean? = this.principal.boo
 fun Principal?.stringAttribute(name: String): String? = singleStringAttributeValue(this?.attributes?.get(name))
 fun Principal?.booleanAttribute(name: String): Boolean? = singleBooleanAttributeValue(this?.attributes?.get(name))
 
+fun Map<String, List<Any?>>?.stringAttribute(name:  String): String? = singleStringAttributeValue(this?.get(name))
+fun Map<String, List<Any?>>?.booleanAttribute(name:  String): Boolean? = singleBooleanAttributeValue(this?.get(name))
+
 fun alaUserId(value: Any?): Long? = singleLongAttributeValue(value)
 
 fun singleLongAttributeValue(value: Any?): Long? = when (value) {
@@ -38,9 +41,9 @@ fun singleBooleanAttributeValue(value: Any?): Boolean? = when(value) {
     else -> null
 }
 
-fun MutableMap<String, Any?>.setSingleAttributeValue(name: String, value: Any?) {
+fun MutableMap<String, List<Any?>>.setSingleAttributeValue(name: String, value: Any?) {
     when(val oldValue = this.getValue(name)) {
-        is MutableList<*> -> if (oldValue.size > 0) (oldValue as MutableList<Any?>)[0] = value else (oldValue as MutableCollection<Any?>).add(value)
+        is MutableList<*> -> if (oldValue.isNotEmpty()) (oldValue as MutableList<Any?>)[0] = value else (oldValue as MutableCollection<Any?>).add(value)
         is MutableCollection<*> -> {
             oldValue.clear()
             (oldValue as MutableCollection<Any?>).add(value)
@@ -51,7 +54,7 @@ fun MutableMap<String, Any?>.setSingleAttributeValue(name: String, value: Any?) 
             this[name] = list
         }
         else -> {
-            this[name] = value
+            this[name] = listOf(value)
         }
     }
 }

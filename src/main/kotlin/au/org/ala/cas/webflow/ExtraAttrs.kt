@@ -33,14 +33,14 @@ data class ExtraAttrs @JvmOverloads constructor(
 
     private val validators: Map<String, Map<String, () -> Boolean>> = mapOf()
 
-    val invalid get() = validators.any { (k, v) -> v.any { (n, f) -> f() } }
+    val invalid get() = validators.any { (_, v) -> v.any { (_, f) -> f() } }
 
     fun validate(context: ValidationContext) {
         log.debug("validate {}", this)
         val messages = context.messageContext
 
         validators.forEach { (fieldName, v) ->
-            v.forEach { name, f ->
+            v.forEach { (name, f) ->
                 if (f()) {
                     messages.addMessage(
                         MessageBuilder().error().code("ala.user.attributes.$fieldName.$name").source(

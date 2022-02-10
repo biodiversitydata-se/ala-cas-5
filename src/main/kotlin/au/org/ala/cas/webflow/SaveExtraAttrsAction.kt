@@ -1,19 +1,14 @@
 package au.org.ala.cas.webflow
 
 import au.org.ala.cas.*
-import au.org.ala.cas.delegated.AlaPrincipalFactory
 import au.org.ala.utils.logger
 import org.apereo.cas.authentication.Authentication
-import org.apereo.cas.authentication.principal.ClientCredential
 import org.apereo.cas.web.support.WebUtils
 import org.apereo.services.persondir.support.CachingPersonAttributeDaoImpl
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
-import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.webflow.action.AbstractAction
-import org.springframework.webflow.engine.FlowVariable
-import org.springframework.webflow.engine.VariableValueFactory
 import org.springframework.webflow.execution.Event
 import org.springframework.webflow.execution.RequestContext
 import javax.sql.DataSource
@@ -34,9 +29,6 @@ open class SaveExtraAttrsAction(
         const val CITY = "city"
         const val STATE = "state"
         const val COUNTRY = "country"
-//        const val TELEPHONE = "telephone"
-//        const val PRIMARY_USER_TYPE = "primaryUserType"
-//        const val SECONDARY_USER_TYPE = "secondaryUserType"
     }
 
     val transactionTemplate: TransactionTemplate = TransactionTemplate(transactionManager)
@@ -98,7 +90,7 @@ open class SaveExtraAttrsAction(
 
     private fun updateField(template: NamedParameterJdbcTemplate, userid: Long, name: String, value: String) {
         val params = mapOf("userid" to userid, "name" to name, "value" to value)
-        val result = template.queryForObject(alaCasProperties.userCreator.jdbc.countExtraAttributeSql, params, Integer::class.java)
+        val result = template.queryForObject(alaCasProperties.userCreator.jdbc.countExtraAttributeSql, params, Integer::class.java)!!
         val updateCount = if (result > 0) {
             template.update(alaCasProperties.userCreator.jdbc.updateExtraAttributeSql, params)
         } else {

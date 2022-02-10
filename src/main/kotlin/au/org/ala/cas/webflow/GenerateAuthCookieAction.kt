@@ -1,12 +1,11 @@
 package au.org.ala.cas.webflow
 
-import au.org.ala.cas.singleStringAttributeValue
 import au.org.ala.cas.stringAttribute
 import au.org.ala.utils.logger
 import org.apereo.cas.authentication.AuthenticationException
 import org.apereo.cas.ticket.InvalidTicketException
 import org.apereo.cas.ticket.registry.TicketRegistrySupport
-import org.apereo.cas.web.support.CookieRetrievingCookieGenerator
+import org.apereo.cas.web.cookie.CasCookieBuilder
 import org.apereo.cas.web.support.WebUtils
 import org.springframework.webflow.action.AbstractAction
 import org.springframework.webflow.execution.Event
@@ -14,10 +13,10 @@ import org.springframework.webflow.execution.RequestContext
 import java.net.URLEncoder
 
 open class GenerateAuthCookieAction(
-    val ticketRegistrySupport: TicketRegistrySupport,
-    val alaProxyAuthenticationCookieGenerator: CookieRetrievingCookieGenerator,
-    val quoteCookieValue: Boolean,
-    val encodeCookieValue: Boolean
+        val ticketRegistrySupport: TicketRegistrySupport,
+        val alaProxyAuthenticationCookieGenerator: CasCookieBuilder,
+        val quoteCookieValue: Boolean,
+        val encodeCookieValue: Boolean
 ) : AbstractAction() {
 
     companion object {

@@ -26,9 +26,9 @@ class AlaPrincipalFactory(
 
     override fun createPrincipal(id: String) = createAlaPrincipal(id, emptyMap())
 
-    override fun createPrincipal(id: String, attributes: Map<String, Any>) = createAlaPrincipal(id, attributes)
+    override fun createPrincipal(id: String, attributes: Map<String, List<Any>>) = createAlaPrincipal(id, attributes)
 
-    private fun createAlaPrincipal(id: String, attributes: Map<String, Any>): Principal {
+    private fun createAlaPrincipal(id: String, attributes: Map<String, List<Any>>): Principal {
         val attributeParser = AttributeParser.create(id, attributes)
         val email = attributeParser.findEmail()
         log.debug("email : {}", email)

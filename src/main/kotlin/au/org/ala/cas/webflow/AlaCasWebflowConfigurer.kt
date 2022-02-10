@@ -91,7 +91,7 @@ class AlaCasWebflowConfigurer(
         // 1. Is this is delegated login creating a new user? If Yes continue, otherwise resume existing flow
         // 2. Show extra attributes form to collect additional properties for profile
         // 3.
-        val clientAction = flow.getState(CasWebflowConstants.STATE_ID_CLIENT_ACTION) as ActionState
+        val clientAction = flow.getState(CasWebflowConstants.ACTION_ID_DELEGATED_AUTHENTICATION) as ActionState
         val successTransition = clientAction.getTransition(CasWebflowConstants.TRANSITION_ID_SUCCESS) as Transition
         createTransitionForState(clientAction, CasWebflowConstants.TRANSITION_ID_SUCCESS, DECISION_ID_EXTRA_ATTRS, true)
 

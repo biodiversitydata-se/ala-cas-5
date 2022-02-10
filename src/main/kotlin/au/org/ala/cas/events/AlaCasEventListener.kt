@@ -1,11 +1,8 @@
 package au.org.ala.cas.events
 
 import au.org.ala.cas.alaUserId
-import au.org.ala.cas.singleStringAttributeValue
 import au.org.ala.cas.stringAttribute
 import au.org.ala.utils.logger
-import org.apereo.cas.authentication.UsernamePasswordCredential
-import org.apereo.cas.support.events.authentication.CasAuthenticationTransactionSuccessfulEvent
 import org.apereo.cas.support.events.ticket.CasTicketGrantingTicketCreatedEvent
 import org.apereo.services.persondir.support.CachingPersonAttributeDaoImpl
 import org.springframework.context.event.EventListener

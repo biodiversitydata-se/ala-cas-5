@@ -7,8 +7,9 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import org.apereo.cas.configuration.support.Beans
 import org.apereo.cas.ticket.registry.TicketRegistry
 import org.apereo.cas.util.HttpRequestUtils
-import org.apereo.cas.web.support.CookieRetrievingCookieGenerator
+import org.apereo.cas.web.cookie.CasCookieBuilder
 import org.apereo.cas.web.support.WebUtils
+import org.apereo.cas.web.support.gen.CookieRetrievingCookieGenerator
 import org.springframework.webflow.execution.RequestContext
 import org.springframework.webflow.execution.RequestContextHolder
 import java.net.URI
@@ -16,10 +17,10 @@ import java.util.concurrent.TimeUnit
 import javax.servlet.http.HttpServletRequest
 
 class AlaTemplateClient(
-    val skinConfig: SkinProperties,
+        val skinConfig: SkinProperties,
 //    val cookieName: String,
-    val ticketGrantingTicketCookieGenerator: CookieRetrievingCookieGenerator,
-    val ticketRegistry: TicketRegistry) {
+        val ticketGrantingTicketCookieGenerator: CasCookieBuilder,
+        val ticketRegistry: TicketRegistry) {
 
     companion object {
         const val LOGGED_IN_CLASS = "logged-in"

@@ -20,7 +20,7 @@ class AlaPasswordEncoder private constructor(val delegate: PasswordEncoder) : Pa
     companion object {
         private val log = logger()
 
-        const val DEFAULT_LOCATION = "/data/cas5/config/pwe.properties"
+        const val DEFAULT_LOCATION = "/data/cas/config/pwe.properties"
         const val LOCATION_SYSTEM_PROPERTY = "ala.password.properties"
         const val LOCATION_ENV_VARIABLE = "ALA_PASSWORD_PROPERTIES"
 

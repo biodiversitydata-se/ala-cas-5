@@ -2,33 +2,34 @@ package au.org.ala.cas.jndi
 
 import au.org.ala.utils.logger
 import com.zaxxer.hikari.HikariJNDIFactory
+import org.apache.catalina.Context
 import org.apache.catalina.startup.Tomcat
+import org.apache.coyote.http2.Http2Protocol
 import org.apache.tomcat.util.descriptor.web.ContextResource
 import org.apereo.cas.configuration.CasConfigurationProperties
-import org.apereo.cas.configuration.support.JpaBeans
+import org.apereo.cas.tomcat.CasTomcatServletWebServerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.AutoConfigureOrder
+import org.springframework.boot.autoconfigure.AutoConfigureBefore
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
-import org.springframework.boot.context.embedded.tomcat.TomcatContextCustomizer
+import org.springframework.boot.autoconfigure.flyway.FlywayProperties
+import org.springframework.boot.autoconfigure.web.ServerProperties
+import org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfiguration
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import javax.sql.DataSource
-import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainer
-import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory
-import org.springframework.core.Ordered
-import org.springframework.security.authentication.AnonymousAuthenticationProvider
-import org.springframework.security.web.authentication.AnonymousAuthenticationFilter
-import javax.servlet.Servlet
+import org.springframework.boot.web.embedded.tomcat.TomcatContextCustomizer
+import org.springframework.boot.web.embedded.tomcat.TomcatWebServer
+import org.springframework.boot.web.servlet.server.ServletWebServerFactory
 
 /**
  * This Configuration simply creates simple JNDI datasources based off the JndiConfigurationProperites.
  */
 @Configuration
-@AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)
-@ConditionalOnClass(Servlet::class, Tomcat::class)
-@EnableConfigurationProperties(JndiConfigurationProperties::class, CasConfigurationProperties::class)
+//@AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)
+@ConditionalOnClass(value = [Tomcat::class, Http2Protocol::class])
+@AutoConfigureBefore(ServletWebServerFactoryAutoConfiguration::class)
+@EnableConfigurationProperties(JndiConfigurationProperties::class, CasConfigurationProperties::class, ServerProperties::class, FlywayProperties::class)
 class AlaTomcatContainerFactoryConfiguration {
 
     companion object {
@@ -36,59 +37,80 @@ class AlaTomcatContainerFactoryConfiguration {
     }
 
     @Autowired
+    lateinit var casProperties: CasConfigurationProperties
+
+    @Autowired
+    lateinit var serverProperties: ServerProperties
+
+    @Autowired
+    lateinit var flywayProperties: FlywayProperties
+
+    @Autowired
     lateinit var jndiConfigurationProperties: JndiConfigurationProperties
 
-    // TODO 5.3.0+ convert to a CasTomcatEmbeddedServletContainerFactory
+//    @FlywayDataSource
+//    @Primary
 //    @Bean
-//    @Qualifier("casServletContainerFactory")
-//    fun casServletContainerFactory(): CasTomcatEmbeddedServletContainerFactory {
-//        return object : CasTomcatEmbeddedServletContainerFactory(casConfigurationProperties.server.clustering) {
-    @Bean
-    fun casServletContainerFactory(): TomcatEmbeddedServletContainerFactory {
-        return object : TomcatEmbeddedServletContainerFactory() {
+//    fun flywayDataSource(): DataSource {
+//        val config = HikariConfig()
+//        config.username = flywayProperties.user
+//        config.password = flywayProperties.password
+//        config.jdbcUrl = flywayProperties.url
+//        return com.zaxxer.hikari.HikariDataSource(config)
+//    }
 
-            override fun getTomcatEmbeddedServletContainer(
-                tomcat: Tomcat
-            ): TomcatEmbeddedServletContainer {
+
+    @Bean
+    fun casServletWebServerFactory(): ServletWebServerFactory {
+        return object : CasTomcatServletWebServerFactory(casProperties, serverProperties) {
+
+            override fun getTomcatWebServer(tomcat: Tomcat): TomcatWebServer {
                 tomcat.enableNaming()
-                return super.getTomcatEmbeddedServletContainer(tomcat)
+                tomcat.host.findChildren()
+                        .filterIsInstance(Context::class.java)
+                        .forEach(this@AlaTomcatContainerFactoryConfiguration::customiseTomcatContext)
+                return super.getTomcatWebServer(tomcat)
             }
-        }.apply {
-            addContextCustomizers(TomcatContextCustomizer { context ->
-                jndiConfigurationProperties.hikari.map { (configName, config) ->
-                    ContextResource().apply {
-                        name = configName
-                        type = DataSource::class.java.name
-                        setProperty("factory", HikariJNDIFactory::class.java.name)
-                        config.driverClass?.let { setProperty("driverClassName", it) }
-                        setProperty("jdbcUrl", config.url)
-                        setProperty("url", config.url)
-                        setProperty("username", config.user)
-                        setProperty("password", config.password)
-                        config.allowPoolSuspension?.let { setProperty("allowPoolSuspension", it) }
-                        config.autoCommit?.let { setProperty("autoCommit", it) }
-                        config.catalog?.let { setProperty("catalog", it) }
-                        config.connectionInitSql?.let { setProperty("connectionInitSql", it) }
-                        config.connectionTestQuery?.let { setProperty("connectionTestQuery", it) }
-                        config.connectionTimeout?.let { setProperty("connectionTimeout", it) }
-                        config.idleTimeout?.let { setProperty("idleTimeout", it) }
-                        config.initializationFailTimeout?.let { setProperty("initializationFailTimeout", it) }
-                        config.isolateInternalQueries?.let { setProperty("isolateInternalQueries", it) }
-                        config.leakDetectionThreshold?.let { setProperty("leakDetectionThreshold", it) }
-                        config.maximumPoolSize?.let { setProperty("maximumPoolSize", it) }
-                        config.maxLifetime?.let { setProperty("maxLifetime", it) }
-                        config.minimumIdle?.let { setProperty("minimumIdle", it) }
-                        config.poolName?.let { setProperty("poolName", it) }
-                        config.readOnly?.let { setProperty("readOnly", it) }
-                        config.registerMbeans?.let { setProperty("registerMbeans", it) }
-                        config.schema?.let { setProperty("schema", it) }
-                        config.transactionIsolation?.let { setProperty("transactionIsolation", it) }
-                        config.validationTimeout?.let { setProperty("validationTimeout", it) }
-                        config.dataSourceProperties.forEach { (name, value) -> setProperty("dataSource.$name", value) }
-                    }
-                }.forEach(context.namingResources::addResource)
-            })
         }
     }
 
+    @Bean
+    fun tomcatContextCustomiser() = TomcatContextCustomizer { context ->
+        customiseTomcatContext(context)
+    }
+
+    private fun customiseTomcatContext(context: Context) {
+        jndiConfigurationProperties.hikari.map { (configName, config) ->
+            ContextResource().apply {
+                name = configName
+                type = DataSource::class.java.name
+                setProperty("factory", HikariJNDIFactory::class.java.name)
+                config.driverClass?.let { setProperty("driverClassName", it) }
+                setProperty("jdbcUrl", config.url)
+                setProperty("url", config.url)
+                setProperty("username", config.user)
+                setProperty("password", config.password)
+                config.allowPoolSuspension?.let { setProperty("allowPoolSuspension", it) }
+                config.autoCommit?.let { setProperty("autoCommit", it) }
+                config.catalog?.let { setProperty("catalog", it) }
+                config.connectionInitSql?.let { setProperty("connectionInitSql", it) }
+                config.connectionTestQuery?.let { setProperty("connectionTestQuery", it) }
+                config.connectionTimeout?.let { setProperty("connectionTimeout", it) }
+                config.idleTimeout?.let { setProperty("idleTimeout", it) }
+                config.initializationFailTimeout?.let { setProperty("initializationFailTimeout", it) }
+                config.isolateInternalQueries?.let { setProperty("isolateInternalQueries", it) }
+                config.leakDetectionThreshold?.let { setProperty("leakDetectionThreshold", it) }
+                config.maximumPoolSize?.let { setProperty("maximumPoolSize", it) }
+                config.maxLifetime?.let { setProperty("maxLifetime", it) }
+                config.minimumIdle?.let { setProperty("minimumIdle", it) }
+                config.poolName?.let { setProperty("poolName", it) }
+                config.readOnly?.let { setProperty("readOnly", it) }
+                config.registerMbeans?.let { setProperty("registerMbeans", it) }
+                config.schema?.let { setProperty("schema", it) }
+                config.transactionIsolation?.let { setProperty("transactionIsolation", it) }
+                config.validationTimeout?.let { setProperty("validationTimeout", it) }
+                config.dataSourceProperties.forEach { (name, value) -> setProperty("dataSource.$name", value) }
+            }
+        }.forEach(context.namingResources::addResource)
+    }
 }

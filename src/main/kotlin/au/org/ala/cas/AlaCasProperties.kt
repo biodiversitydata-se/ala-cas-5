@@ -61,12 +61,14 @@ open class SkinProperties {
     var uiVersion: Int = 2
 }
 
-open class AlaAuthCookieProperties : CookieProperties() {
+open class AlaAuthCookieProperties : TicketGrantingCookieProperties() {
     init {
         name = "ALA-Auth"
+        rememberMeMaxAge = "P14D"
+        crypto.isEnabled = false
     }
 
-    var rememberMeMaxAge: String = "P14D"
+//    var rememberMeMaxAge: String = "P14D"
     var quoteValue: Boolean = true
     var urlEncodeValue: Boolean = false
 }

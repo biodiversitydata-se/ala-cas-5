@@ -4,11 +4,12 @@ import au.org.ala.cas.AlaCasProperties
 import au.org.ala.utils.logger
 import org.apereo.cas.authentication.support.password.PasswordEncoderUtils
 import org.apereo.cas.configuration.CasConfigurationProperties
-import org.apereo.cas.configuration.support.Beans
 import org.apereo.cas.ticket.registry.TicketRegistrySupport
+import org.apereo.cas.web.cookie.CasCookieBuilder
 import org.apereo.cas.web.flow.CasWebflowExecutionPlan
 import org.apereo.cas.web.flow.CasWebflowExecutionPlanConfigurer
-import org.apereo.cas.web.support.CookieRetrievingCookieGenerator
+import org.apereo.cas.web.support.CookieUtils
+import org.apereo.cas.web.support.gen.CookieRetrievingCookieGenerator
 import org.apereo.services.persondir.support.CachingPersonAttributeDaoImpl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -69,19 +70,11 @@ class AlaCasWebflowConfiguration : CasWebflowExecutionPlanConfigurer {
     @Qualifier("cachingAttributeRepository")
     lateinit var cachingAttributeRepository: CachingPersonAttributeDaoImpl
 
-    @Autowired
-    @Qualifier("ticketGrantingTicketCookieGenerator")
-    lateinit var ticketGrantingTicketCookieGenerator: CookieRetrievingCookieGenerator
-
     @Bean
     @RefreshScope
     @Qualifier("alaProxyAuthenticationCookieGenerator")
-    fun alaProxyAuthenticationCookieGenerator(): CookieRetrievingCookieGenerator =
-        alaCasProperties.cookie.run {
-            CookieRetrievingCookieGenerator(name, path, maxAge, isSecure, domain, isHttpOnly).also { cookieGen ->
-                cookieGen.setRememberMeMaxAge(Beans.newDuration(rememberMeMaxAge).seconds.toInt())
-            }
-        }
+    fun alaProxyAuthenticationCookieGenerator(): CasCookieBuilder =
+        CookieRetrievingCookieGenerator(CookieUtils.buildCookieGenerationContext(alaCasProperties.cookie))
 
     @Bean
     fun generateAuthCookieAction(): GenerateAuthCookieAction =

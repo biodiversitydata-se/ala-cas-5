@@ -1,1 +1,10 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=org.apereo.cas.config.CasOverlayOverrideConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=org.apereo.cas.config.CasOverlayOverrideConfiguration,\
+  au.org.ala.cas.jndi.AlaTomcatContainerFactoryConfiguration,\
+  au.org.ala.cas.webflow.AlaCasWebflowConfiguration,\
+  au.org.ala.cas.delegated.AlaPac4jAuthenticationConfiguration,\
+  au.org.ala.cas.thymeleaf.AlaThymeleafConfiguration,\
+  au.org.ala.cas.thymeleaf.AlaCasThemesConfiguration,\
+  au.org.ala.cas.session.AlaSpringSessionConfiguration,\
+  au.org.ala.cas.session.AlaSpringSessionFilterConfiguration,\
+  au.org.ala.cas.events.AlaEventsConfiguration,\
+  au.org.ala.cas.mongo.MongoIndexConfiguration

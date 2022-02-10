@@ -1,6 +1,9 @@
 package au.org.ala.cas.delegated
 
+import au.org.ala.cas.booleanAttribute
+import au.org.ala.cas.stringAttribute
 import au.org.ala.utils.logger
+import au.org.ala.utils.urlParameterSafe
 import org.json.JSONArray
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.oauth.profile.facebook.FacebookProfile
@@ -23,7 +26,7 @@ interface AttributeParser {
         /** Log instance.  */
         private val log = logger()
 
-        fun create(typedId: String, userAttributes: Map<String, Any>): AttributeParser {
+        fun create(typedId: String, userAttributes: Map<String, List<Any>>): AttributeParser {
             val profileType = typedId.substringBefore(UserProfile.SEPARATOR)
 
             return when (profileType) {
@@ -74,7 +77,7 @@ interface AttributeParser {
     fun findLastname(): String?
 }
 
-class GithubAttributeParser(val userAttributes: Map<String, Any>) : AttributeParser {
+class GithubAttributeParser(val userAttributes: Map<String, List<Any>>) : AttributeParser {
 
     companion object {
         val log = logger()
@@ -96,15 +99,15 @@ class GithubAttributeParser(val userAttributes: Map<String, Any>) : AttributePar
         //
 
         val githubAccessToken = userAttributes["access_token"]
-        if (githubAccessToken == null) {
+        if (githubAccessToken == null || githubAccessToken.isEmpty()) {
             log.debug("can't get a valid GitHub access_token!")
             return null
         }
 
-        val githubEmailREST = "https://api.github.com/user/emails?access_token=" + githubAccessToken
+        val githubEmailREST = "https://api.github.com/user/emails?access_token=${githubAccessToken.first().toString().urlParameterSafe()}"
 
-        val result = HTTP_GET(githubEmailREST)
-        log.debug("HTTP_GET {}; result: {}", githubEmailREST, result)
+        val result = httpGet(githubEmailREST)
+        log.debug("httpGet {}; result: {}", githubEmailREST, result)
 
         try {
 
@@ -129,12 +132,12 @@ class GithubAttributeParser(val userAttributes: Map<String, Any>) : AttributePar
     }
 
     override fun findFirstname() =
-        AttributeParser.extractFirstName(userAttributes["name"] as? String, userAttributes["login"] as? String)
+        AttributeParser.extractFirstName(userAttributes.stringAttribute("name"), userAttributes.stringAttribute("login"))
 
     override fun findLastname() =
-        AttributeParser.extractLastName(userAttributes["name"] as? String, userAttributes["login"] as? String)
+        AttributeParser.extractLastName(userAttributes.stringAttribute("name"), userAttributes.stringAttribute("login"))
 
-    fun HTTP_GET(urlStr: String): String? {
+    private fun httpGet(urlStr: String): String? {
         var conn: HttpURLConnection? = null
         var reader: BufferedReader? = null
 
@@ -149,7 +152,7 @@ class GithubAttributeParser(val userAttributes: Map<String, Any>) : AttributePar
             return reader.readText()
 
         } catch (e: Exception) {
-            log.warn("HTTP_GET error for {}", urlStr, e)
+            log.warn("httpGet error for {}", urlStr, e)
 
         } finally {
             try {
@@ -157,32 +160,32 @@ class GithubAttributeParser(val userAttributes: Map<String, Any>) : AttributePar
                 conn?.disconnect()
 
             } catch (ioe: IOException) {
-                log.warn("Exception while closing HTTP_GET {}", urlStr, ioe)
+                log.warn("Exception while closing httpGet {}", urlStr, ioe)
             }
         }
         return null
     }
 }
 
-class OAuth20AttributeParser(val userAttributes: Map<String, Any>) : AttributeParser {
+class OAuth20AttributeParser(val userAttributes: Map<String, List<Any>>) : AttributeParser {
     override fun findEmail() = findFirst("email", "email-address")
     override fun findFirstname() = findFirst("first_name", "first-name")
     override fun findLastname() = findFirst("last_name", "last-name")
 
     internal fun findFirst(vararg attributeNames: String) =
-        attributeNames.mapNotNull { userAttributes[it] as? String }.firstOrNull()
+        attributeNames.mapNotNull { userAttributes.stringAttribute(it) }.firstOrNull()
 }
 
-class TwitterAttributeParser(val userAttributes: Map<String, Any>) : AttributeParser {
-    override fun findEmail() = userAttributes["email"] as? String
+class TwitterAttributeParser(val userAttributes: Map<String, List<Any>>) : AttributeParser {
+    override fun findEmail() = userAttributes.stringAttribute("email")
     override fun findFirstname() =
-        AttributeParser.extractFirstName(userAttributes["name"] as? String, userAttributes["screen_name"] as? String)
+        AttributeParser.extractFirstName(userAttributes.stringAttribute("name"), userAttributes.stringAttribute("screen_name"))
 
     override fun findLastname() =
-        AttributeParser.extractLastName(userAttributes["name"] as? String, userAttributes["screen_name"] as? String)
+        AttributeParser.extractLastName(userAttributes.stringAttribute("name"), userAttributes.stringAttribute("screen_name"))
 }
 
-class Google2AttributeParser(val userAttributes: Map<String, Any>) : AttributeParser {
+class Google2AttributeParser(val userAttributes: Map<String, List<Any>>) : AttributeParser {
     companion object {
         val log = logger()
     }
@@ -194,15 +197,22 @@ class Google2AttributeParser(val userAttributes: Map<String, Any>) : AttributePa
         //       of type "account".
         //
         val emails = userAttributes[Google2ProfileDefinition.EMAILS]
-        val googleEmail = when (emails) {
-            is List<*> -> (emails as List<Google2Email>).firstOrNull { it.type == "account" }?.email
-            else -> {
-                if (userAttributes[Google2ProfileDefinition.EMAIL_VERIFIED] as? Boolean != false) {
-                    userAttributes[Google2ProfileDefinition.EMAIL]?.toString()
-                } else {
-                    null
-                }
+
+        val googleEmail = if (emails.isNullOrEmpty()) {
+            val verified = userAttributes.booleanAttribute(Google2ProfileDefinition.EMAIL_VERIFIED)
+            if (verified != false) {
+                userAttributes.stringAttribute(Google2ProfileDefinition.EMAIL)
+            } else {
+                null
             }
+        } else {
+            emails.mapNotNull { candidate ->
+                when (candidate) {
+                    is Google2Email -> if (candidate.type == "account") candidate.email else null
+                    is String -> candidate
+                    else -> null
+                }
+            }.firstOrNull()
         }
 
         // Not sure if this can really happen; we should reach this point only after a successful authentication,
@@ -213,7 +223,13 @@ class Google2AttributeParser(val userAttributes: Map<String, Any>) : AttributePa
         return googleEmail
     }
 
-    override fun findFirstname() = userAttributes[Google2ProfileDefinition.GIVEN_NAME] as? String ?: AttributeParser.extractFirstName(userAttributes[Google2ProfileDefinition.NAME] as? String, "")
-    override fun findLastname() = userAttributes[Google2ProfileDefinition.FAMILY_NAME] as? String ?: userAttributes["family_name"] as? String ?: AttributeParser.extractLastName(userAttributes[Google2ProfileDefinition.NAME] as? String, "")
+    override fun findFirstname() =
+            userAttributes.stringAttribute(Google2ProfileDefinition.GIVEN_NAME) ?:
+            AttributeParser.extractFirstName(userAttributes.stringAttribute(Google2ProfileDefinition.NAME), "")
+
+    override fun findLastname() =
+            userAttributes.stringAttribute(Google2ProfileDefinition.FAMILY_NAME) ?:
+            userAttributes.stringAttribute("family_name") ?:
+            AttributeParser.extractLastName(userAttributes.stringAttribute(Google2ProfileDefinition.NAME), "")
 
 }

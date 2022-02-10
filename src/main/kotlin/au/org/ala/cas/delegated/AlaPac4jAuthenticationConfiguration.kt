@@ -42,6 +42,7 @@ class AlaPac4jAuthenticationConfiguration {
      */
     @FlywayDataSource
     @Qualifier("alaCasFlywayDataSource")
+    @Bean
     fun alaCasFlywayDataSource(): DataSource {
         val hc = HikariConfig()
         hc.jdbcUrl = flywayProperties.url
@@ -68,7 +69,7 @@ class AlaPac4jAuthenticationConfiguration {
     @Bean(name = ["clientPrincipalFactory"])
     @RefreshScope
     fun clientPrincipalFactory(
-        @Autowired personDirectoryPrincipalResolver: PrincipalResolver,
+            @Autowired @Qualifier("defaultPrincipalResolver") personDirectoryPrincipalResolver: PrincipalResolver,
         @Autowired @Qualifier("cachingAttributeRepository") cachingAttributeRepository: CachingPersonAttributeDaoImpl,
         @Autowired userCreator: UserCreator
     ): PrincipalFactory = AlaPrincipalFactory(personDirectoryPrincipalResolver, cachingAttributeRepository, userCreator)

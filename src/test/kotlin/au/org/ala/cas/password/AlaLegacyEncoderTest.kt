@@ -1,6 +1,6 @@
 package au.org.ala.cas.password
 
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import kotlin.test.*
 
 const val PRE_ENCODED = "ix7dE9NCi4MvygreOZtrTA=="
