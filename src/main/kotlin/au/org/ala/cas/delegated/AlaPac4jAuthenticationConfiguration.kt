@@ -1,6 +1,7 @@
 package au.org.ala.cas.delegated
 
 import au.org.ala.cas.AlaCasProperties
+import au.org.ala.cas.webflow.ExtraAttributesService
 import au.org.ala.utils.logger
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -64,8 +65,9 @@ class AlaPac4jAuthenticationConfiguration {
     fun clientPrincipalFactory(
         @Autowired @Qualifier("personDirectoryAttributeRepositoryPrincipalResolver") personDirectoryPrincipalResolver: PrincipalResolver,
         @Autowired @Qualifier("cachingAttributeRepository") cachingAttributeRepository: IPersonAttributeDao, //CachingPersonAttributeDaoImpl,
-        @Autowired userCreator: UserCreator
-    ): PrincipalFactory = AlaPrincipalFactory(personDirectoryPrincipalResolver, cachingAttributeRepository, userCreator)
+        @Autowired userCreator: UserCreator,
+        @Autowired extraAttributesService: ExtraAttributesService,
+    ): PrincipalFactory = AlaPrincipalFactory(personDirectoryPrincipalResolver, cachingAttributeRepository, userCreator, extraAttributesService)
 
     // TODO How to replicate this?
     @PostConstruct
