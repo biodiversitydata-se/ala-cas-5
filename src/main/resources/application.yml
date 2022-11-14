@@ -411,4 +411,5 @@ ala:
     orgNameKey: ala
     cacheDuration: PT30m # 1800000
     ui-version: 2
+    supportEmail: support@ala.org.au
 debug: false
