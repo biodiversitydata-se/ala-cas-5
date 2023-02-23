@@ -6,14 +6,21 @@ import au.org.ala.utils.logger
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.github.scribejava.core.model.OAuth1RequestToken
+import org.apereo.cas.authentication.Authentication
 import org.apereo.cas.authentication.principal.PrincipalFactory
 import org.apereo.cas.authentication.principal.PrincipalResolver
+import org.apereo.cas.authentication.principal.WebApplicationService
 import org.apereo.cas.authentication.support.password.PasswordEncoderUtils
 import org.apereo.cas.configuration.support.JpaBeans
-import org.apereo.cas.ticket.TransientSessionTicket
+import org.apereo.cas.services.RegisteredService
 import org.apereo.cas.ticket.TransientSessionTicketImpl
+import org.apereo.cas.ticket.accesstoken.OAuth20DefaultAccessToken
+import org.apereo.cas.ticket.code.OAuth20DefaultCode
+import org.apereo.cas.ticket.refreshtoken.OAuth20DefaultRefreshToken
 import org.apereo.cas.ticket.serialization.TicketSerializationExecutionPlan
 import org.apereo.cas.ticket.serialization.serializers.TransientSessionTicketStringSerializer
+import org.apereo.cas.util.serialization.AbstractJacksonBackedStringSerializer
+import org.apereo.cas.validation.ImmutableAssertion
 import org.apereo.services.persondir.IPersonAttributeDao
 import org.pac4j.core.client.Clients
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,6 +31,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
+import java.io.Serializable
 import javax.annotation.PostConstruct
 
 @Configuration
@@ -89,6 +97,14 @@ class AlaPac4jAuthenticationConfiguration {
         } else {
             log.warn("TST serializer {} is not TransientSessionTicketStringSerializer :(", serializer)
         }
+
+        listOf(OAuth20DefaultCode::class.java,
+            OAuth20DefaultRefreshToken::class.java,
+            TransientSessionTicketImpl::class.java,
+            OAuth20DefaultAccessToken::class.java)
+            .map(ticketSerializationExecutionPlan::getTicketSerializer)
+            .filterIsInstance<AbstractJacksonBackedStringSerializer<*>>()
+            .forEach { it.objectMapper.addMixIn(ImmutableAssertion::class.java, ImmutableAssertionMixin::class.java) }
     }
 
 }
@@ -100,3 +116,13 @@ abstract class OAuth1RequestTokenMixin @JsonCreator constructor(
     @JsonProperty("rawResponse") rawResponse: String?) {
 
 }
+
+abstract class ImmutableAssertionMixin @JsonCreator constructor(
+    @JsonProperty("primaryAuthentication") primaryAuthentication: Authentication,
+    @JsonProperty("originalAuthentication") originalAuthentication: Authentication,
+    @JsonProperty("chainedAuthentications") chainedAuthentications: List<Authentication?>,
+    @JsonProperty("fromNewLogin") fromNewLogin: Boolean,
+    @JsonProperty("service") service: WebApplicationService,
+    @JsonProperty("registeredService") registeredService: RegisteredService,
+    @JsonProperty("context") context: Map<String?, Serializable?>
+)

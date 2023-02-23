@@ -1,3 +1,10 @@
+Upgrade notes from CAS 6.5.6-2 to 6.6.5-1
+====================================
+
+1. "CAS" service entries need to updated from class RegexRegisteredService to CasApplicationService:
+```json
+db.services.update({_class: 'org.apereo.cas.services.RegexRegisteredService'}, {'$set': { '_class': 'org.apereo.cas.services.CasRegisteredService' } });
+```
 Upgrade notes from CAS 6.5.6-1 to 6.5.6-2
 ====================================
 

@@ -30,7 +30,7 @@
                         <h2 class="panel-title" th:utext="#{screen.unavailable.heading(${status},${error})}">CAS is unable to process this request: "{0}:{1}"</h2>
                     </div>
                     <div class="panel-body">
-                        <p th:utext="#{screen.unavailable.message}">screen.unavailable.message would go here</p>
+                        <p th:utext="#{screen.unavailable.message($supportEmail)}">screen.unavailable.message would go here</p>
                         <pre id="errorMsg" class="mt-4" style="white-space: pre-wrap;" th:text="${'Error: ' + message}">error message would go here</pre>
                         <p id="errorDetails">
                             <button type="button" class="btn btn-shutdown"

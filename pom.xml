@@ -14,7 +14,7 @@
     <artifactId>cas</artifactId>
     <packaging>war</packaging>
     <!-- Version should ${cas.version}-${ala.build.version}(-SNAPSHOT)? -->
-    <version>6.5.9-1-SNAPSHOT</version>
+    <version>6.6.5-1-SNAPSHOT</version>
 
     <name>ALA CAS</name>
     <description>ALA Central Authentication Service</description>
@@ -196,14 +196,30 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
-<!--            <plugin>-->
-<!--                <artifactId>maven-surefire-plugin</artifactId>-->
-<!--                <version>3.0.0-M5</version>-->
-<!--&lt;!&ndash;                <version>2.22.1</version>&ndash;&gt;-->
-<!--                <configuration>-->
-<!--                    <jvm>${env.JAVA_HOME}/bin/java</jvm>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
+            <!-- override enforcer enforce-bytecode-version config to exclude org.mongodb:bson-record-codec because
+                 it's only loaded when java records are encountered -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-bytecode-version</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <enforceBytecodeVersion>
+                                    <excludes>
+                                        <exclude>org.mongodb:bson-record-codec</exclude>
+                                    </excludes>
+                                </enforceBytecodeVersion>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
         <finalName>cas</finalName>
     </build>
@@ -631,6 +647,12 @@
         </dependency>
         <dependency>
             <groupId>org.apereo.cas</groupId>
+            <artifactId>cas-server-core-validation-api</artifactId>
+            <version>${cas.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apereo.cas</groupId>
             <artifactId>cas-server-core-util</artifactId>
             <version>${cas.version}</version>
             <scope>compile</scope>
@@ -831,7 +853,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20210307</version>
+            <version>20220320</version>
         </dependency>
         <dependency>
             <groupId>org.apereo.cas</groupId>
@@ -858,22 +880,22 @@
         <dependency>
             <groupId>org.springframework.session</groupId>
             <artifactId>spring-session-data-mongodb</artifactId>
-            <version>2.6.3</version>
+            <version>2.7.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.session</groupId>
             <artifactId>spring-session-core</artifactId>
-            <version>2.6.3</version>
+            <version>2.7.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-mongodb</artifactId>
-            <version>3.3.5</version>
+            <version>3.4.8</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.session</groupId>
             <artifactId>spring-session-data-redis</artifactId>
-            <version>2.6.3</version>
+            <version>2.7.0</version>
         </dependency>
 
         <!-- Lombok for the CAS sources -->
@@ -900,8 +922,8 @@
     </dependencies>
 
     <properties>
-        <cas.version>6.5.9</cas.version>
-        <springboot.version>2.6.3</springboot.version>
+        <cas.version>6.6.5</cas.version>
+        <springboot.version>2.7.3</springboot.version>
         <!-- app.server could be -jetty, -undertow, -tomcat, or blank if you plan to provide appserver -->
         <!-- we use blank to create a blank war and spring boot repackage to build an executable Tomcat jar -->
         <app.server></app.server>

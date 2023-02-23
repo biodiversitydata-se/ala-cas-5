@@ -33,6 +33,7 @@ class AlaCasThemesConfiguration {
         const val ALA_UI_VERSION = "alaUiVersion"
         const val ALA_PROPERTIES = "ala"
         const val LOGIN_LOGO = "loginLogo"
+        const val SUPPORT_EMAIL = "supportEmail"
 
         val log = logger()
 
@@ -54,6 +55,7 @@ class AlaCasThemesConfiguration {
                 CREATE_ACCOUNT_URL to alaCasProperties.skin.createAccountUrl,
                 ALA_UI_VERSION to "ala-ui-${alaCasProperties.skin.uiVersion}",
                 LOGIN_LOGO to alaCasProperties.skin.loginLogo,
+                SUPPORT_EMAIL to alaCasProperties.skin.supportEmail,
                 ALA_PROPERTIES to alaCasProperties
             ).forEach(action)
         }
