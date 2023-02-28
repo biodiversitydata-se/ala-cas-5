@@ -1,6 +1,7 @@
 package au.org.ala.cas.delegated
 
 import au.org.ala.cas.booleanAttribute
+import au.org.ala.cas.webflow.ExtraAttributesService
 import au.org.ala.utils.logger
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apereo.cas.authentication.Credential
@@ -13,7 +14,8 @@ import javax.security.auth.login.FailedLoginException
 class AlaPrincipalFactory(
     private val principalResolver: PrincipalResolver,
     private val cachingAttributeRepository: IPersonAttributeDao, //CachingPersonAttributeDaoImpl,
-    val userCreator: UserCreator
+    val userCreator: UserCreator,
+    val extraAttributesService: ExtraAttributesService
 ) : PrincipalFactory {
 
     companion object {
@@ -89,6 +91,8 @@ class AlaPrincipalFactory(
                 throw FailedLoginException("Unable to create ALA user for $emailAddress with attributes $attributes")
             }
         }
+        // Save delegated id for future work
+        extraAttributesService.addDelegatedId(principal, id, attributes)
         // The PAC4j client support expects a principal with the same id as the input principal, so return a new
         // principal with the input id and the attributes from the db.
         return DefaultPrincipalFactory().createPrincipal(id, principal.attributes)

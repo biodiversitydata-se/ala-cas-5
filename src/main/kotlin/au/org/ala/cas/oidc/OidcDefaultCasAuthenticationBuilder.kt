@@ -2,10 +2,7 @@ package au.org.ala.cas.oidc
 
 import au.org.ala.utils.logger
 import org.apache.commons.lang3.StringUtils
-import org.apereo.cas.authentication.Authentication
-import org.apereo.cas.authentication.CoreAuthenticationUtils
-import org.apereo.cas.authentication.DefaultAuthenticationBuilder
-import org.apereo.cas.authentication.DefaultAuthenticationHandlerExecutionResult
+import org.apereo.cas.authentication.*
 import org.apereo.cas.authentication.credential.BasicIdentifiableCredential
 import org.apereo.cas.authentication.metadata.BasicCredentialMetaData
 import org.apereo.cas.authentication.principal.PrincipalFactory
@@ -14,10 +11,12 @@ import org.apereo.cas.authentication.principal.ServiceFactory
 import org.apereo.cas.authentication.principal.WebApplicationService
 import org.apereo.cas.configuration.CasConfigurationProperties
 import org.apereo.cas.support.oauth.OAuth20Constants
+import org.apereo.cas.support.oauth.authenticator.OAuth20CasAuthenticationBuilder
 import org.apereo.cas.support.oauth.authenticator.OAuth20DefaultCasAuthenticationBuilder
 import org.apereo.cas.support.oauth.profile.OAuth20ProfileScopeToAttributesFilter
 import org.apereo.cas.support.oauth.services.OAuthRegisteredService
 import org.apereo.cas.support.oauth.util.OAuth20Utils
+import org.apereo.cas.support.oauth.web.OAuth20RequestParameterResolver
 import org.pac4j.core.context.WebContext
 import org.pac4j.core.profile.BasicUserProfile
 import org.pac4j.core.profile.UserProfile
@@ -33,11 +32,13 @@ class OidcDefaultCasAuthenticationBuilder(
     principalFactory: PrincipalFactory?,
     webApplicationServiceServiceFactory: ServiceFactory<WebApplicationService>?,
     scopeToAttributesFilter: OAuth20ProfileScopeToAttributesFilter?,
+    requestParameterResolver: OAuth20RequestParameterResolver?,
     casProperties: CasConfigurationProperties?
 ) : OAuth20DefaultCasAuthenticationBuilder(
     principalFactory,
     webApplicationServiceServiceFactory,
     scopeToAttributesFilter,
+    requestParameterResolver,
     casProperties
 ) {
 
@@ -51,9 +52,9 @@ class OidcDefaultCasAuthenticationBuilder(
         context: WebContext,
         service: Service?
     ): Authentication? {
-        val attrs = HashMap(profile.attributes)
+        val attrs = java.util.HashMap(profile.attributes)
         val profileAttributes = CoreAuthenticationUtils.convertAttributeValuesToMultiValuedObjects(attrs)
-        val newPrincipal = principalFactory.createPrincipal(profile.id, profileAttributes)
+        val newPrincipal = principalFactory!!.createPrincipal(profile.id, profileAttributes)
         log.debug(
             "Created final principal [{}] after filtering attributes based on [{}]",
             newPrincipal,
@@ -62,10 +63,9 @@ class OidcDefaultCasAuthenticationBuilder(
         val authenticator = profile.javaClass.canonicalName
         val metadata = BasicCredentialMetaData(BasicIdentifiableCredential(profile.id))
         val handlerResult =
-            DefaultAuthenticationHandlerExecutionResult(authenticator, metadata, newPrincipal, ArrayList(0))
-//        val scopes = OAuth20Utils.getRequestedScopes(context)
-        val scopes = determineValidScopes(registeredService, OAuth20Utils.getRequestedScopes(context))
-
+            DefaultAuthenticationHandlerExecutionResult(authenticator, metadata, newPrincipal, java.util.ArrayList(0))
+//        val scopes = requestParameterResolver!!.resolveRequestedScopes(context)
+        val scopes = determineValidScopes(registeredService, requestParameterResolver!!.resolveRequestedScopes(context))
         val state = context.getRequestParameter(OAuth20Constants.STATE)
             .map { obj: String? ->
                 java.lang.String.valueOf(
@@ -73,7 +73,7 @@ class OidcDefaultCasAuthenticationBuilder(
                 )
             }
             .or {
-                OAuth20Utils.getRequestParameter(
+                requestParameterResolver.resolveRequestParameter(
                     context,
                     OAuth20Constants.STATE
                 )
@@ -86,7 +86,7 @@ class OidcDefaultCasAuthenticationBuilder(
                 )
             }
             .or {
-                OAuth20Utils.getRequestParameter(
+                requestParameterResolver.resolveRequestParameter(
                     context,
                     OAuth20Constants.NONCE
                 )

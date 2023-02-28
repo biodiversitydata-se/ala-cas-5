@@ -7,11 +7,13 @@ import org.apereo.cas.authentication.principal.WebApplicationService
 import org.apereo.cas.configuration.CasConfigurationProperties
 import org.apereo.cas.support.oauth.authenticator.OAuth20CasAuthenticationBuilder
 import org.apereo.cas.support.oauth.profile.OAuth20ProfileScopeToAttributesFilter
+import org.apereo.cas.support.oauth.web.OAuth20RequestParameterResolver
 import org.apereo.cas.support.oauth.web.response.accesstoken.OAuth20TokenGenerator
 import org.apereo.cas.ticket.accesstoken.OAuth20AccessTokenFactory
 import org.apereo.cas.ticket.device.OAuth20DeviceTokenFactory
 import org.apereo.cas.ticket.device.OAuth20DeviceUserCodeFactory
 import org.apereo.cas.ticket.refreshtoken.OAuth20RefreshTokenFactory
+import org.apereo.cas.ticket.registry.TicketRegistry
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.context.config.annotation.RefreshScope
@@ -32,13 +34,12 @@ class OidcConfiguration {
         @Qualifier("defaultDeviceTokenFactory") defaultDeviceTokenFactory: OAuth20DeviceTokenFactory,
         @Qualifier("defaultRefreshTokenFactory") defaultRefreshTokenFactory: OAuth20RefreshTokenFactory,
         @Qualifier("defaultAccessTokenFactory") defaultAccessTokenFactory: OAuth20AccessTokenFactory,
-        @Qualifier(CentralAuthenticationService.BEAN_NAME) centralAuthenticationService: CentralAuthenticationService,
+        ticketRegistry: TicketRegistry,
         casProperties: CasConfigurationProperties
     ): OAuth20TokenGenerator {
         return OidcDefaultTokenGenerator(
             defaultAccessTokenFactory, defaultDeviceTokenFactory,
-            defaultDeviceUserCodeFactory, defaultRefreshTokenFactory,
-            centralAuthenticationService, casProperties
+            defaultDeviceUserCodeFactory, defaultRefreshTokenFactory, ticketRegistry, casProperties
         )
     }
 
@@ -51,8 +52,10 @@ class OidcConfiguration {
         profileScopeToAttributesFilter: OAuth20ProfileScopeToAttributesFilter,
         @Qualifier(WebApplicationService.BEAN_NAME_FACTORY)
         webApplicationServiceFactory: ServiceFactory<WebApplicationService>,
+        requestParameterResolver: OAuth20RequestParameterResolver,
         casProperties: CasConfigurationProperties
     ): OAuth20CasAuthenticationBuilder {
-        return OidcDefaultCasAuthenticationBuilder(oauthPrincipalFactory, webApplicationServiceFactory, profileScopeToAttributesFilter, casProperties)
+        return OidcDefaultCasAuthenticationBuilder(oauthPrincipalFactory, webApplicationServiceFactory,
+            profileScopeToAttributesFilter, requestParameterResolver, casProperties)
     }
 }

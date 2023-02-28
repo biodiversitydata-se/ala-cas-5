@@ -1,12 +1,22 @@
 package au.org.ala.cas.webflow
 
 import au.org.ala.cas.AlaCasProperties
+import au.org.ala.cas.delegated.*
 import au.org.ala.cas.setSingleAttributeValue
+import au.org.ala.cas.singleLongAttributeValue
 import au.org.ala.cas.stringAttribute
 import au.org.ala.utils.logger
 import org.apereo.cas.authentication.Authentication
+import org.apereo.cas.authentication.principal.Principal
 import org.apereo.services.persondir.IPersonAttributeDao
-import org.apereo.services.persondir.support.CachingPersonAttributeDaoImpl
+import org.pac4j.core.util.Pac4jConstants
+import org.pac4j.oauth.profile.facebook.FacebookProfile
+import org.pac4j.oauth.profile.github.GitHubProfile
+import org.pac4j.oauth.profile.google2.Google2Profile
+import org.pac4j.oauth.profile.linkedin2.LinkedIn2Profile
+import org.pac4j.oauth.profile.twitter.TwitterProfile
+import org.pac4j.oauth.profile.windowslive.WindowsLiveProfile
+import org.pac4j.oidc.profile.OidcProfile
 import org.springframework.context.MessageSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
@@ -84,6 +94,48 @@ class ExtraAttributesService(
                 log.warn("Rolling back transaction because of exception", e)
                 status.setRollbackOnly()
             }
+        }
+    }
+
+    /**
+     * Connects the delegated id to a database attribute
+     * @param principal The resolved user principal for the delegated login
+     * @param typedId The pac4j typed id from the delegated login
+     * @param attributes The pac4j delegated login profile attributes
+     */
+    fun addDelegatedId(principal: Principal, typedId: String, attributes: Map<String, List<Any>>) {
+        val dbId = singleLongAttributeValue(principal.attributes["userid"])
+
+        if (dbId != null) {
+            val dbKey = when (typedId.substringBefore(Pac4jConstants.TYPED_ID_SEPARATOR)) {
+                GitHubProfile::class.java.name -> "github.id"
+                FacebookProfile::class.java.name -> "facebook.id"
+                LinkedIn2Profile::class.java.name -> "linkedin.id"
+                WindowsLiveProfile::class.java.name -> "windowslive.id"
+                OidcProfile::class.java.name -> "aaf.id" // TODO Get pac4j client name
+                TwitterProfile::class.java.name -> "twitter.id"
+                Google2Profile::class.java.name -> "google.id"
+                else -> null
+            }
+            if (dbKey != null) {
+                val dbValue = typedId.substringAfter(Pac4jConstants.TYPED_ID_SEPARATOR)
+
+                transactionTemplate.execute { status ->
+                    try {
+                        val template = NamedParameterJdbcTemplate(dataSource)
+                        updateField(template, dbId, dbKey, dbValue)
+                    } catch (e: Exception) {
+                        // If we can't save the survey, just log and move on because we don't want to
+                        // prevent the user from actually logging in
+                        log.warn("Rolling back transaction because of exception", e)
+                        status.setRollbackOnly()
+                    }
+                }
+            } else {
+                log.error("Aborting due to unsupported profile type in typed id: $typedId")
+            }
+        } else {
+            log.warn("Couldn't find db id from principal $principal for typed id $typedId")
         }
     }
 

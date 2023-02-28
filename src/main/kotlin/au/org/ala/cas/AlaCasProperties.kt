@@ -11,7 +11,8 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty
 open class AlaCasProperties(
     @field:NestedConfigurationProperty var cookie: AlaAuthCookieProperties = AlaAuthCookieProperties(),
     @field:NestedConfigurationProperty var userCreator: UserCreatorProperties = UserCreatorProperties(),
-    @field:NestedConfigurationProperty val skin: SkinProperties = SkinProperties()
+    @field:NestedConfigurationProperty val skin: SkinProperties = SkinProperties(),
+    @field:NestedConfigurationProperty val rest: RestProperties = RestProperties(),
 ) {
     lateinit var userDetailsBaseUrl: String
 
@@ -61,6 +62,7 @@ open class SkinProperties {
     lateinit var orgLongName: String
     lateinit var orgNameKey: String
     lateinit var loginLogo: String
+    lateinit var supportEmail: String
     var cacheDuration: String = "PT30m"
     var uiVersion: Int = 2
 }
@@ -73,4 +75,8 @@ open class AlaAuthCookieProperties : CookieProperties() {
     var rememberMeMaxAge: String = "P14D"
     var quoteValue: Boolean = true
     var urlEncodeValue: Boolean = false
+}
+
+open class RestProperties {
+    var requiredScopes: List<String> = arrayListOf("users/read")
 }

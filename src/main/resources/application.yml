@@ -268,10 +268,10 @@ cas:
       driverClass: com.mysql.cj.jdbc.Driver
       validationQuery: /* ping */ SELECT 1
   tgc:
-    maxAge: 86400 # Same as TGT expiry
+    maxAge: 31536000 # Same as TGT expiry
     secure: true
     httpOnly: true
-    rememberMeMaxAge: PT7884000S #7884000
+    rememberMeMaxAge: -1 # Never expires
     crypto:
       enabled: false
 #    encryptionKey=
@@ -282,11 +282,11 @@ cas:
   ticket:
     tgt:
       primary:
-        maxTimeToLiveInSeconds: 86400 # PT24H
-        timeToKillInSeconds: 86400 # PT24H
+        maxTimeToLiveInSeconds: 31536000 # P1Y
+        timeToKillInSeconds: 7884000 # P3M
       rememberMe:
         enabled: true
-        timeToKillInSeconds: 7884000 # P3M
+        timeToKillInSeconds: -1 # Never expires
     registry:
 #      cleaner:
 #        schedule:
@@ -322,6 +322,7 @@ cas:
     followServiceRedirects: true
     redirectParameter: url
     confirmLogout: false
+    remove-descendant-tickets: false
   slo:
     disabled: false
     asynchronous: true
@@ -410,5 +411,6 @@ ala:
     orgLongName: Atlas Of Living Australia
     orgNameKey: ala
     cacheDuration: PT30m # 1800000
+    supportEmail: support@ala.org.au
     ui-version: 2
 debug: false

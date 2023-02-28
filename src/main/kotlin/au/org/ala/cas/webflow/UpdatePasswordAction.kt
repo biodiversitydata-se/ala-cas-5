@@ -14,6 +14,7 @@ import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.webflow.action.AbstractAction
 import org.springframework.webflow.execution.Event
 import org.springframework.webflow.execution.RequestContext
+import java.nio.CharBuffer
 import javax.sql.DataSource
 
 class UpdatePasswordAction(
@@ -35,11 +36,11 @@ class UpdatePasswordAction(
         val authentication = WebUtils.getAuthentication(context)
         val userid = authentication.alaUserId()
         val legacyPassword = authentication.booleanAttribute("legacyPassword") ?: false
-        if (credential != null && credential is UsernamePasswordCredential && !credential.password.isNullOrBlank() && legacyPassword && userid != null) {
+        if (credential != null && credential is UsernamePasswordCredential && credential.password.isNotEmpty() && legacyPassword && userid != null) {
             log.info("Upgrading legacy password for {} ({})", credential.username, userid)
             val params = mapOf(
                 "userid" to userid,
-                "password" to passwordEncoder.encode(credential.password)
+                "password" to passwordEncoder.encode(CharBuffer.wrap(credential.password))
             )
             transactionTemplate.execute { status ->
                 try {
