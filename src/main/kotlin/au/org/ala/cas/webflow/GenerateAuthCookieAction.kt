@@ -31,15 +31,15 @@ open class GenerateAuthCookieAction(
         //
         // Create ALA specific cookie that any ALA web application can read
         //
-        val ticketGrantingTicket = WebUtils.getTicketGrantingTicketId(context)
+        val ticketGrantingTicket = WebUtils.getTicketGrantingTicket(context)
 
-        if (!ticketGrantingTicket.isNullOrBlank()) {
-            log.debug("Ticket-granting ticket found in the context is [{}]", ticketGrantingTicket)
-            val authentication =
-                this.ticketRegistrySupport.getAuthenticationFrom(ticketGrantingTicket) ?: throw InvalidTicketException(
-                    AuthenticationException("No authentication found for ticket $ticketGrantingTicket"),
-                    ticketGrantingTicket
-                )
+        if (ticketGrantingTicket != null) {
+            log.debug("Ticket-granting ticket found in the context is [{}]", ticketGrantingTicket.id)
+            val authentication = ticketGrantingTicket.authentication ?: throw InvalidTicketException(
+                AuthenticationException("No authentication found for ticket $ticketGrantingTicket"),
+                ticketGrantingTicket.id
+            )
+
             val email = authentication.stringAttribute("email") ?: authentication.principal.id ?: throw IllegalStateException("Principal id is missing?!")
 
             alaProxyAuthenticationCookieGenerator.addCookie(
