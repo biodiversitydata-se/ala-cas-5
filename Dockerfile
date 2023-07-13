@@ -1,8 +1,13 @@
 FROM openjdk:11-jre-slim
-ENV APP_ARTIFACT=cas
-ENV APP_VERSION=6.5.6-3
+ARG APP_ARTIFACT=cas
+ARG APP_VERSION=6.5.6-3
+ENV JAVA_OPTS="-Djava.awt.headless=true -Xmx2g -Xms512m -XX:+UseConcMarkSweepGC -Dcas.standalone.configurationDirectory=/data/cas/config -Dala.password.properties=/data/cas/config/pwe.properties -Dlog4j2.formatMsgNoLookups=true"
+ENV LOGGING_CONFIG=/data/cas/config/log4j2.xml
+ENV LOG_DIR=/var/log/atlas/cas
 WORKDIR /opt
 ADD https://nexus.ala.org.au/service/local/repositories/releases/content/au/org/ala/${APP_ARTIFACT}/${APP_VERSION}/${APP_ARTIFACT}-${APP_VERSION}-exec.war app.war
 RUN mkdir /data
+RUN mkdir -p /var/log/atlas/cas
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.war"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.war"]
+# For debug: CMD ["tail", "-f", "/dev/null"]
