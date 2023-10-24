@@ -1,0 +1,49 @@
+services:
+
+  mysqldb:
+    image: mysql:8.0
+    volumes:
+      - db_data_cas:/var/lib/mysql
+      #- /home/mats/Documents/sbdi/ala-cas-5/emmet-dump__231018.sql:/tmp/emmet-dump__231018.sql
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      MYSQL_DATABASE: emmet
+      MYSQL_USER: cas
+      MYSQL_PASSWORD: cas
+    ports:
+      - 3306:3306
+
+  mongodb:
+    image: mongo:4
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: cas
+      MONGO_INITDB_ROOT_PASSWORD: cas
+    volumes:
+      - db_data_mongo_cas:/data/db
+      #- /home/mats/Documents/sbdi/ala-cas-5/mongodbcas-dump__231018:/tmp/mongodbcas-dump__231018
+    ports:
+      - 27017:27017
+
+  #cas:
+  #  depends_on:
+  #    - mysqldb
+  #  image: sbdi/cas-dev
+  #  build:
+  #    context: .
+  #  ports:
+  #    - 9000:9000
+  #  volumes:
+  #    - ./sbdi/data/config/application.yml:/data/cas/config/application.yml
+  #    - ./sbdi/data/config/pwe.properties:/data/cas/config/pwe.properties
+  #    - ./etc/cas/config/log4j2.xml:/data/cas/config/log4j2.xml
+  #    - ./etc/cas/config/cas.properties:/data/cas/config/cas.properties
+
+volumes:
+  db_data_cas:
+  db_data_mongo_cas:
+#  db_data_cas_local:
+#    driver: local
+#    driver_opts:
+#      type: none
+#      o: bind
+#      device: "/home/mats/Documents/sbdi/ala-cas-5/db_data_cas"

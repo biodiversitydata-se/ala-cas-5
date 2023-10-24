@@ -1,0 +1,242 @@
+info:
+  description: ALA CAS Configuration
+server:
+  port: 9000
+  session:
+    timeout: 86400  # seconds, 24 hours
+  ssl:
+    enabled: false
+    key-store: 
+  forward-headers-strategy: native
+  tomcat:
+    remoteip:
+      protocol-header: x-forwarded-proto
+      port-header: x-forwarded-port
+      remote-ip-header: x-forwarded-for
+      protocol-header-https-value: https
+jndi:
+  hikari:
+    jdbccas:
+      driverClass: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/emmet?serverTimezone=Europe/Stockholm&zeroDateTimeBehavior=convertToNull&logger=Slf4JLogger&gatherPerfMetrics=true&logSlowQueries=true&characterEncoding=UTF-8&nullCatalogMeansCurrent=true&nullNamePatternMatchesAll=true&noAccessToProcedureBodies=true&useSSL=false&allowPublicKeyRetrieval=true
+      user: cas
+      password: cas
+      dataSourceProperties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+
+logging:
+  config: "file:/data/cas/config/log4j2.xml"
+
+cas:
+  server:
+    name: http://localhost:8080
+    prefix: ${cas.server.name}/cas
+  host:
+    name: localhost:8080
+  http-web-request:
+    cors:
+      enabled: true
+      #allow-origin-patterns:
+      allow-origins:
+        - '*'
+  jdbc:
+    showSql: false
+  audit:
+    mongo:
+      #sslEnabled: false
+      #client-uri: mongodb://cas:cas@localhost:27017/cas-audit-repository
+      #client-uri: ''
+      host: localhost
+      port: 27017
+      #replicaSet:
+      databaseName: cas-audit-repository
+      authenticationDatabaseName: admin
+      userId: cas
+      password: cas
+      timeout: PT10S
+  authn:
+    attribute-repository:
+      core:
+        default-attributes-to-release: []
+    throttle:
+      failure:
+        range-seconds: 30
+        threshold: 3
+    pac4j:
+      core:
+        typedIdUsed: true
+      #facebook:
+      #  id:
+      #  secret:
+      #  scope:
+      #twitter:
+      #  id:
+      #  secret:
+      google:
+        scope: EMAIL_AND_PROFILE
+        id:
+        secret:
+      github:
+        id:
+        secret:
+      #linkedin:
+      #  id:
+      #  secret:
+      #windows:
+      #  id:
+      #  secret:
+      #yahoo:
+      #  id:
+      #  secret:
+      #oidc:
+      #- generic:
+      #    client-name: aaf
+      #    discovery-uri:
+      #    id:
+      #    secret:
+      #    scope: openid profile email
+      #    cssClass: aaf-logo
+    #oauth:
+    #  core:
+    #    userProfileViewType:
+    #  crypto:
+    #    encryption:
+    #      key:
+    #   signing:
+    #      key:
+    #  access-token:
+    #    crypto:
+    #      encryption:
+    #        key:
+    #      signing:
+    #        key:
+    oidc:
+      core:
+        issuer: ${cas.server.name}/cas/oidc
+      jwks:
+        file-system:
+          jwks-file: file:/data/cas/keystore.jwks
+  monitor:
+    endpoints:
+    jdbc:
+      validationQuery: /* ping */ SELECT 1
+      dataSourceName: java:comp/env/jdbccas
+  service-registry:
+    core:
+      init-from-json: true
+    mongo:
+      #sslEnabled: false
+      client-uri: mongodb://cas:cas@localhost:27017
+      #host: localhost
+      #port: 27017
+      #replicaSet:
+      collection: services
+      #databaseName: cas-service-registry
+      #authenticationDatabaseName: cas-service-registry
+      #userId: services
+      #password: services
+      timeout: PT10S
+  ticket:
+    tgt:
+      primary:
+        maxTimeToLiveInSeconds: 86400
+        timeToKillInSeconds: 86400
+      rememberMe:
+        enabled: true
+        timeToKillInSeconds: 7884000
+    registry:
+      cleaner:
+        schedule:
+          enabled: true
+      mongo:
+        update-indexes: true
+        drop-indexes: false
+        #sslEnabled: false
+        client-uri: mongodb://cas:cas@localhost:27017
+        #host: mongodbcas
+        #port: 27017
+        #replicaSet:
+        #databaseName: cas-ticket-registry
+        #authenticationDatabaseName: cas-ticket-registry
+        #userId: tickets
+        #password: tickets
+        timeout: PT15S
+    st:
+      timeToKillInSeconds: 15
+  tgc:
+    maxAge: 86400 # Same as TGT expiry
+    rememberMeMaxAge: PT7884000S
+    crypto:
+      enabled: false
+  webflow:
+    crypto:
+      signing:
+        key: webflow_signing_key
+      encryption:
+        key: webflow_encryption_key
+
+ala:
+  userDetailsBaseUrl: https://auth.biodiversitydata.se/userdetails/
+  cookie:
+    domain: biodiversitydata.se
+    secure: false
+    httpOnly: true
+    maxAge: -1
+    name: ALA-Auth
+    path: /
+    sameSitePolicy: lax
+  userCreator:
+    defaultCountry: SE
+    userCreatePassword: user_create_password
+    enableUserSurvey: false
+    jdbc:
+      dataSourceName: java:comp/env/jdbccas
+      enableUpdateLastLoginTime: true
+      enableRequestExtraAttributes: true
+      enableUpdateLegacyPasswords: true
+  skin:
+    baseUrl: https://tools.biodiversitydata.se
+    termsUrl: https://docs.biodiversitydata.se/sbdi-data/sbdi-atlas-terms-of-use/
+    uiVersion: 2
+    headerFooterUrl: https://static.biodiversitydata.se/
+    favIconBaseUrl: https://static.biodiversitydata.se/
+    bieBaseUrl: https://species.biodiversitydata.se
+    bieSearchPath: /search
+    userDetailsUrl: https://auth.biodiversitydata.se/userdetails/
+    orgShortName: SBDI
+    orgLongName: Swedish Biodiversity Data Infrastructure
+    orgNameKey: sbdi
+    loginLogo: https://biodiversitydata.se/wp-content/uploads/2021/02/sbdi-logo-orginal-large.png
+
+# Enable these for Spring Boot actuator (required for Spring Boot Admin client)
+
+endpoints:
+  enabled: true
+security:
+  user:
+    name: admin
+    password: secret
+    role:
+      - ACTUATOR
+  basic:
+    enabled: true
+    authorizeMode: role
+    realm: ALA CAS
+    path:
+      - /status/**
+management:
+  security:
+    enabled: true
+    roles: ACTUATOR
+
+spring:
+  flyway:
+    baselineOnMigrate: true
+    url: jdbc:mysql://localhost:3306/emmet?serverTimezone=Europe/Stockholm&zeroDateTimeBehavior=convertToNull&characterEncoding=UTF-8&nullCatalogMeansCurrent=true&nullNamePatternMatchesAll=true&noAccessToProcedureBodies=true&useSSL=false&allowPublicKeyRetrieval=true
+    user: cas
+    password: cas
+  session:
+    enabled: false
+    store-type: none
