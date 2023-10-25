@@ -1,27 +1,18 @@
-FROM openjdk:8-alpine
+FROM eclipse-temurin:11-jre
 
-ENV APP_NAME="cas"
+ENV TZ=Europe/Stockholm
 
-ENV BUILD_DEPS="gettext" \
-    RUNTIME_DEPS="libintl" \
-    LOG_DIR=/var/log/atlas/${APP_NAME}
+RUN mkdir -p /app /data/cas/config
 
-RUN mkdir -p /app \
-    /data/${APP_NAME}/config \
-    /var/log/atlas/${APP_NAME}
+COPY target/cas-exec.war /app/cas-exec.war
 
-COPY ${APP_NAME}*-exec.war /app/${APP_NAME}-exec.war
-COPY config/application.yml /tmp/application.yml
-COPY config/log4j2.xml /data/${APP_NAME}/config/log4j2.xml
-COPY config/pwe.properties /tmp/pwe.properties
+ENV DOCKERIZE_VERSION v0.7.0
 
-RUN \
-    apk add --update $RUNTIME_DEPS && \
-    apk add --virtual build_deps $BUILD_DEPS &&  \
-    cp /usr/bin/envsubst /usr/local/bin/envsubst && \
-    apk del $BUILD_DEPS && \
-    apk add --update tini
+RUN apt-get update \
+    && apt-get install -y wget \
+    && wget -O - https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz | tar xzf - -C /usr/local/bin \
+    && apt-get autoremove -yqq --purge wget && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 9000
-ENTRYPOINT ["tini", "--"]
-CMD ["sh", "-c", "envsubst < /tmp/pwe.properties > /data/${APP_NAME}/config/pwe.properties && envsubst < /tmp/application.yml > /data/${APP_NAME}/config/application.yml && java -Djava.util.logging.config.file=/data/${APP_NAME}/config/log4j2.xml -Dcas.standalone.configurationDirectory=/data/${APP_NAME}/config -Dala.password.properties=/data/${APP_NAME}/config/pwe.properties -jar /app/cas-exec.war"]
+
+CMD ["sh", "-c", "java -Djava.util.logging.config.file=/data/cas/config/log4j2.xml -Dcas.standalone.configurationDirectory=/data/cas/config -Dala.password.properties=/data/cas/config/pwe.properties -jar /app/cas-exec.war"]

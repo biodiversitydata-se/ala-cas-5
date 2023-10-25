@@ -31,10 +31,10 @@ logging:
 
 cas:
   server:
-    name: http://localhost:8080
+    name: http://localhost:9000
     prefix: ${cas.server.name}/cas
   host:
-    name: localhost:8080
+    name: localhost:9000
   http-web-request:
     cors:
       enabled: true
