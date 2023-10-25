@@ -46,15 +46,14 @@ cas:
   audit:
     mongo:
       #sslEnabled: false
-      #client-uri: mongodb://cas:cas@localhost:27017/cas-audit-repository
-      #client-uri: ''
-      host: localhost
-      port: 27017
+      clientUri: mongodb://cas:cas@localhost:27017
+      #host: localhost
+      #port: 27017
       #replicaSet:
       databaseName: cas-audit-repository
-      authenticationDatabaseName: admin
-      userId: cas
-      password: cas
+      #authenticationDatabaseName: cas-audit-repository
+      #userId: cas
+      #password: cas
       timeout: PT10S
   authn:
     attribute-repository:
@@ -98,20 +97,20 @@ cas:
       #    secret:
       #    scope: openid profile email
       #    cssClass: aaf-logo
-    #oauth:
-    #  core:
-    #    userProfileViewType:
-    #  crypto:
-    #    encryption:
-    #      key:
-    #   signing:
-    #      key:
-    #  access-token:
-    #    crypto:
-    #      encryption:
-    #        key:
-    #      signing:
-    #        key:
+    oauth:
+      core:
+        userProfileViewType: FLAT
+      crypto:
+        encryption:
+          key: DPhfnZgKiUADE1-XIFjOBrOBNexu16VIqaWlc7YDghE
+        signing:
+          key: lx5EMNIkCflJBCwmoSbT_8r364cmnERWOeVn3mds50NbQTi6BQu5C1oJodIR6MSJXOaOEV34G1ZE4wsRq-6g8Q
+      access-token:
+        crypto:
+          encryption:
+            key: FH0_Z5RvGLblJuoetLndkpyOV7FtkCkWdDtAg4BeAzU
+          signing:
+            key: cuRS7_QPxEudnacl0VNA8fksjzD7dRT3HuBCt_78suPVuTkLCF3tTeyrYiyJk20_iwksqYjHdceQf3GZE2SU5Q
     oidc:
       core:
         issuer: ${cas.server.name}/cas/oidc
@@ -128,7 +127,7 @@ cas:
       init-from-json: true
     mongo:
       #sslEnabled: false
-      client-uri: mongodb://cas:cas@localhost:27017
+      clientUri: mongodb://cas:cas@localhost:27017
       #host: localhost
       #port: 27017
       #replicaSet:
@@ -154,7 +153,7 @@ cas:
         update-indexes: true
         drop-indexes: false
         #sslEnabled: false
-        client-uri: mongodb://cas:cas@localhost:27017
+        clientUri: mongodb://cas:cas@localhost:27017
         #host: mongodbcas
         #port: 27017
         #replicaSet:
@@ -173,9 +172,9 @@ cas:
   webflow:
     crypto:
       signing:
-        key: webflow_signing_key
+        key: D59xkdA6utu30uCiYNYTUByeZFCgG0t7fdh7XPhmNLkuhOqEURb7Nt3acZzmKFisPWfwLNNzZ41faMXprG5oTQ
       encryption:
-        key: webflow_encryption_key
+        key: JoWtOXhK9_0dlNT_DYXeKg
 
 ala:
   userDetailsBaseUrl: https://auth.biodiversitydata.se/userdetails/
