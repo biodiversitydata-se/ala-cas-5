@@ -46,7 +46,7 @@ cas:
   audit:
     mongo:
       #sslEnabled: false
-      clientUri: mongodb://cas:cas@localhost:27017
+      clientUri: mongodb://audit:audit@localhost:27017/cas-audit-repository
       #host: localhost
       #port: 27017
       #replicaSet:
@@ -127,7 +127,7 @@ cas:
       init-from-json: true
     mongo:
       #sslEnabled: false
-      clientUri: mongodb://cas:cas@localhost:27017
+      clientUri: mongodb://service:service@localhost:27017/cas-service-registry
       #host: localhost
       #port: 27017
       #replicaSet:
@@ -153,7 +153,7 @@ cas:
         update-indexes: true
         drop-indexes: false
         #sslEnabled: false
-        clientUri: mongodb://cas:cas@localhost:27017
+        clientUri: mongodb://ticket:ticket@localhost:27017/cas-ticket-registry
         #host: mongodbcas
         #port: 27017
         #replicaSet:
