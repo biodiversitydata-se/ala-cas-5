@@ -15,4 +15,4 @@ RUN apt-get update \
 
 EXPOSE 9000
 
-CMD ["sh", "-c", "java -Djava.util.logging.config.file=/data/cas/config/log4j2.xml -Dcas.standalone.configurationDirectory=/data/cas/config -Dala.password.properties=/data/cas/config/pwe.properties -jar /app/cas-exec.war"]
+CMD ["sh", "-c", "java -Dcas.standalone.configurationDirectory=/data/cas/config -Dala.password.properties=/data/cas/config/pwe.properties -jar /app/cas-exec.war"]

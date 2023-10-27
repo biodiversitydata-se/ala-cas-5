@@ -9,8 +9,7 @@ mats@xps-13:/data/cas$ tree
 .
 ├── config
     ├── application.yml -> /home/mats/src/biodiversitydata-se/ala-cas-5/sbdi/data/config/application.yml
-    ├── cas.properties -> /home/mats/src/biodiversitydata-se/ala-cas-5/etc/cas/config/cas.properties
-    ├── log4j2.xml -> /home/mats/src/biodiversitydata-se/ala-cas-5/etc/cas/config/log4j2.xml
+    ├── log4j2.xml -> /home/mats/src/biodiversitydata-se/ala-cas-5/sbdi/data/config/log4j2.xml
     └── pwe.properties -> /home/mats/src/biodiversitydata-se/ala-cas-5/sbdi/data/config/pwe.properties
 ```
 
