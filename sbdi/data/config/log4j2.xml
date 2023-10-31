@@ -193,7 +193,7 @@
             <!--<AppenderRef ref="casFile"/>-->
             <AppenderRef ref="casConsole"/>
         </AsyncLogger>
-        <AsyncRoot level="error">
+        <AsyncRoot level="warn">
             <AppenderRef ref="casConsole"/>
         </AsyncRoot>
     </Loggers>

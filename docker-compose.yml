@@ -3,7 +3,7 @@ services:
   mysqldb:
     image: mysql:8.0
     volumes:
-      - db_data_cas:/var/lib/mysql
+      - db_data_mysql_cas:/var/lib/mysql
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
       MYSQL_DATABASE: emmet
@@ -40,7 +40,7 @@ services:
       - ./sbdi/data/config/log4j2.xml:/data/cas/config/log4j2.xml
 
 volumes:
-  db_data_cas:
+  db_data_mysql_cas:
   db_data_mongo_cas:
   #db_data_cas_empty:
   #db_data_mongo_cas_empty:
