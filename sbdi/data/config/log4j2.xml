@@ -193,6 +193,10 @@
             <!--<AppenderRef ref="casFile"/>-->
             <AppenderRef ref="casConsole"/>
         </AsyncLogger>
+        <AsyncLogger name="org.apereo.cas.services.DefaultRegisteredServiceDelegatedAuthenticationPolicy" level="error" additivity="false" includeLocation="true">
+            <!--<AppenderRef ref="casFile"/>-->
+            <AppenderRef ref="casConsole"/>
+        </AsyncLogger>
         <AsyncRoot level="warn">
             <AppenderRef ref="casConsole"/>
         </AsyncRoot>

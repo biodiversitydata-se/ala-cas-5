@@ -35,12 +35,12 @@ cas:
     prefix: ${cas.server.name}/cas
   host:
     name: localhost:9000
-  http-web-request:
+  httpWebRequest:
     cors:
       enabled: true
-      #allow-origin-patterns:
-      allow-origins:
-        - '*'
+      allowOriginPatterns:
+        - http://localhost:*
+        - https://*.biodiversitydata.se
   jdbc:
     showSql: false
   audit:
