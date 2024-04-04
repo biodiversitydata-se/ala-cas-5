@@ -175,6 +175,8 @@ cas:
         key: D59xkdA6utu30uCiYNYTUByeZFCgG0t7fdh7XPhmNLkuhOqEURb7Nt3acZzmKFisPWfwLNNzZ41faMXprG5oTQ
       encryption:
         key: JoWtOXhK9_0dlNT_DYXeKg
+  slo:
+    disabled: true
 
 ala:
   userDetailsBaseUrl: https://auth.biodiversitydata.se/userdetails/
