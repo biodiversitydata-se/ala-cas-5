@@ -209,7 +209,7 @@ ala:
     orgShortName: SBDI
     orgLongName: Swedish Biodiversity Data Infrastructure
     orgNameKey: sbdi
-    loginLogo: https://biodiversitydata.se/wp-content/uploads/2021/02/sbdi-logo-orginal-large.png
+    loginLogo: https://static.biodiversitydata.se/images/sbdi-logo-orginal-large.png
 
 # Enable these for Spring Boot actuator (required for Spring Boot Admin client)
 
