@@ -181,7 +181,7 @@ cas:
 ala:
   userDetailsBaseUrl: https://auth.biodiversitydata.se/userdetails/
   cookie:
-    domain: biodiversitydata.se
+    domain: localhost
     secure: false
     httpOnly: true
     maxAge: -1
