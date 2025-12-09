@@ -198,18 +198,18 @@ ala:
       enableRequestExtraAttributes: true
       enableUpdateLegacyPasswords: true
   skin:
-    baseUrl: https://tools.biodiversitydata.se
+    baseUrl: https://bioatlas.biodiversitydata.se
     termsUrl: https://docs.biodiversitydata.se/sbdi-data/sbdi-atlas-terms-of-use/
     uiVersion: 2
-    headerFooterUrl: https://static.biodiversitydata.se/
-    favIconBaseUrl: https://static.biodiversitydata.se/
+    headerFooterUrl: https://bioatlas.biodiversitydata.se/
+    favIconBaseUrl: https://bioatlas.biodiversitydata.se/
     bieBaseUrl: https://species.biodiversitydata.se
     bieSearchPath: /search
     userDetailsUrl: https://auth.biodiversitydata.se/userdetails/
     orgShortName: SBDI
     orgLongName: Swedish Biodiversity Data Infrastructure
     orgNameKey: sbdi
-    loginLogo: https://static.biodiversitydata.se/images/sbdi-logo-orginal-large.png
+    loginLogo: https://bioatlas.biodiversitydata.se/app/themes/sbdi/assets/images/sbdi-logo-orginal-large.png
 
 # Enable these for Spring Boot actuator (required for Spring Boot Admin client)
 
