@@ -44,6 +44,11 @@ cas:
   jdbc:
     showSql: false
   audit:
+    engine:
+      excluded-actions:
+        - AUTHENTICATION_EVENT_TRIGGERED
+        - DELEGATED_CLIENT_SUCCESS
+        - SERVICE_ACCESS_ENFORCEMENT_TRIGGERED
     mongo:
       #sslEnabled: false
       clientUri: mongodb://audit:audit@localhost:27017/cas-audit-repository
