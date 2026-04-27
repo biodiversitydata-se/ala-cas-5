@@ -188,7 +188,7 @@ ala:
   cookie:
     domain: localhost
     secure: false
-    httpOnly: true
+    httpOnly: false
     maxAge: -1
     name: ALA-Auth
     path: /
