@@ -121,32 +121,12 @@ class AlaCasWebflowConfiguration : CasWebflowExecutionPlanConfigurer {
     }
 
     @Bean
-    @RefreshScope
-    @Qualifier("alaProxyUserCookieGenerator")
-    fun alaProxyUserCookieGenerator(): CasCookieBuilder {
-        val context = alaCasProperties.cookie.run {
-            CookieGenerationContext.builder()
-                .name(name + "-user")
-                .path(path)
-                .maxAge(maxAge)
-                .secure(isSecure)
-                .domain(domain)
-                .httpOnly(false)
-                .rememberMeMaxAge(Beans.newDuration(rememberMeMaxAge).seconds.toInt())
-                .sameSitePolicy(sameSitePolicy)
-                .build()
-        }
-        return CookieRetrievingCookieGenerator(context)
-    }
-
-    @Bean
     fun generateAuthCookieAction(): GenerateAuthCookieAction =
-        GenerateAuthCookieAction(ticketRegistrySupport, alaProxyAuthenticationCookieGenerator(), alaProxyUserCookieGenerator(),
-            alaCasProperties.cookie.quoteValue, alaCasProperties.cookie.urlEncodeValue)
+        GenerateAuthCookieAction(ticketRegistrySupport, alaProxyAuthenticationCookieGenerator(), alaCasProperties.cookie.quoteValue, alaCasProperties.cookie.urlEncodeValue)
 
     @Bean
     fun removeAuthCookieAction(): RemoveAuthCookieAction =
-        RemoveAuthCookieAction(alaProxyAuthenticationCookieGenerator(), alaProxyUserCookieGenerator())
+        RemoveAuthCookieAction(alaProxyAuthenticationCookieGenerator())
 
     @Bean
     @Qualifier(AlaCasWebflowConfigurer.ACTION_ENTER_DELEGATED_AUTH_EXTRA_ATTRS)

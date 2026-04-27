@@ -17,7 +17,6 @@ import javax.servlet.http.HttpServletResponse
 open class GenerateAuthCookieAction(
     val ticketRegistrySupport: TicketRegistrySupport,
     val alaProxyAuthenticationCookieGenerator: CasCookieBuilder,
-    val alaProxyUserCookieGenerator: CasCookieBuilder,
     val quoteCookieValue: Boolean,
     val encodeCookieValue: Boolean
 ) : AbstractAction() {
@@ -47,16 +46,6 @@ open class GenerateAuthCookieAction(
                 context.externalContext.nativeRequest as? HttpServletRequest,
                 context.externalContext.nativeResponse as? HttpServletResponse,
                 quoteValue(encodeValue(email))
-            )
-
-            val firstname = authentication.stringAttribute("firstname") ?: "-"
-            val lastname = authentication.stringAttribute("lastname") ?: "-"
-            val initials = (firstname.take(1) + lastname.take(1)).uppercase()
-
-            alaProxyUserCookieGenerator.addCookie(
-                context.externalContext.nativeRequest as? HttpServletRequest,
-                context.externalContext.nativeResponse as? HttpServletResponse,
-                quoteValue(encodeValue("$firstname|$lastname|$initials"))
             )
         } else {
             log.debug("Ticket-granting ticket ID is blank")
