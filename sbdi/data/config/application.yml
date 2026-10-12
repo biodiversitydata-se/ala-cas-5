@@ -25,6 +25,8 @@ jndi:
         cachePrepStmts: true
         prepStmtCacheSize: 250
         prepStmtCacheSqlLimit: 2048
+        nullCatalogMeansCurrent: true
+        nullNamePatternMatchesAll: true
 
 logging:
   config: "file:/data/cas/config/log4j2.xml"
