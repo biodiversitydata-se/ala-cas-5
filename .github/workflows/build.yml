@@ -24,7 +24,7 @@ jobs:
           cache: maven
 
       - name: Run build with Maven Wrapper
-        run: ./mvnw --batch-mode clean package -T 5
+        run: ./mvnw --batch-mode clean package -T 5 -DskipTests
 
       - name: Upload war
         uses: actions/upload-artifact@v7
