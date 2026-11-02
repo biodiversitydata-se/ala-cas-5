@@ -6,7 +6,7 @@ RUN mkdir -p /app /data/cas/config
 
 COPY target/cas-exec.war /app/cas-exec.war
 
-ENV DOCKERIZE_VERSION=v0.15.1
+ENV DOCKERIZE_VERSION=v0.16.0
 
 RUN apt-get update \
     && apt-get install -y wget \
